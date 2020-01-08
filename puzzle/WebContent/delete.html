@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="/puzzle/scripts/jquery-3.4.1.min.js"></script>
+</head>
+<body>
+<h1>회원탈퇴</h1>
+
+	<table>
+			<tr>
+				<td>pw</td>
+				<td><input id="pw" type="password"></td>
+			</tr>
+		</table>
+		<button id="delete">탈퇴</button>
+	<script>
+	$(document).ready(function(){
+		let loginState = null;
+		$.ajax({
+			url : "/puzzle/GetSessionInfo",
+			method:"post",
+			async: false, // 동기요청
+			success : function(json){
+				loginState = json;
+				console.log(loginState);
+			}
+		});	
+		$("#delete").click(function(){
+					$.ajax({
+						url : "/puzzle/MemberDeleteServlet",
+						method:"post",
+						data: {"memberId":loginState,
+							   "memberPw":$("#pw").val()
+							   },
+								
+					    success : function(json){
+					    console.log("delete");
+					  //로그아웃이 된다.
+							$.ajax({
+								url : "/puzzle/Logout",
+								method:"post",
+								success : function(data){
+							    	console.log("로그아웃");
+								location.href = "/puzzle/index.html";
+								}
+							});
+						
+					    location.href = "/puzzle/index.html";
+					    $("#myid").text("");
+					    
+					    }
+				});
+			});
+	});
+</script>
+
+</body>
+</html>

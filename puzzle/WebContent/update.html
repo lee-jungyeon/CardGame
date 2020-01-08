@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="/puzzle/scripts/jquery-3.4.1.min.js"></script>
+</head>
+<body>
+<h1>비밀번호 수정</h1>
+
+	<table>
+			<tr>
+				<td>pw</td>
+				<td><input class="Pw" type="password"></td>
+			</tr>
+			<tr>
+				<td>Pw확인</td>
+				<td><input class="Pw" type="password"></td>
+			</tr>
+		</table>
+		<button id="update">수정</button>
+	<script>
+	$(document).ready(function(){
+		let loginState = null;
+		$.ajax({
+			url : "/puzzle/GetSessionInfo",
+			method:"post",
+			async: false, // 동기요청
+			success : function(json){
+				loginState = json;
+				console.log(loginState);
+			}
+		});	
+		$("#update").click(function(){
+					$.ajax({
+						url : "/puzzle/MemberUpdateServlet",
+						method:"post",
+						data: {"memberId":loginState,
+							   "memberPw":$(".Pw").val()
+								},
+					    success : function(json){
+					    location.href = "/puzzle/index.html";
+					    console.log("upd");
+					    
+					    }
+				});
+			});
+	});
+</script>
+</body>
+</html>
