@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+	table, td {border :1px solid gray;}
+	table,td {margin: auto;
+			text-align: center;}
+    table {border-collapse: collapse;}	
+    div{text-align:center;}
+    .align_center { width:300px; height:100px; position:absolute; background:#f7c709; top:50%; left:50%; margin:-100px 0 0 -150px; text-align:center; }
+
+</style>
+<script src="/puzzle/scripts/jquery-3.4.1.min.js"></script>
+</head>
+<body>
+	
+	<h1>puzzle -id : <span id= "loginState"></span></h1>
+	<h2 >Level :<span id="level"></span></h2>
+	<h2>Exp:<span id="exp"></span></h2>
+	<button id="logout" type="button"> 로그아웃</button>
+	<button id="hint" type="button">힌트</button>
+	<button id="home" type="button"> 홈으로</button>
+	<div>
+	<div><input id ="boss" type="image" src="/puzzle/images/boss.png"></div><br/>
+	<h2 > <span id="damage"></span>데미지</h2>
+	<h2>제한시간 :<span id="timer">180초</span></h2>
+	<h2>BOSS HP :<span id ="hp">500</span></h2>
+	<table class="border">
+	</table>
+	</div>
+</body>
+
+<script>
+
+//=============================================================================
+	//같은 그림 설정
+	let model1=[ "pic00.png","pic00.png",
+				 "pic01.png","pic01.png",
+				 "pic02.png","pic02.png",
+				 "pic03.png","pic03.png",
+				 "pic04.png","pic04.png",
+				 "pic05.png","pic05.png",
+				 "pic06.png","pic06.png",
+				 "pic07.png","pic07.png",
+				 "a.jpg","a.jpg",
+				 "a1.jpg","a1.jpg",
+				 "a2.jpg","a2.jpg",
+				 "b.jpg","b.jpg",
+				 "c.jpg","c.jpg",
+				 "d.jpg","d.jpg",
+				 "puppy.jpg","puppy.jpg",
+				 "sa.jpg","sa.jpg",
+				 "sd.jpg","sd.jpg",
+				 "ace.jpg","ace.jpg",
+		 		];
+		 		
+//========================================================================================	
+	
+		$(document).ready(function(){
+		
+		//ajax 요청 sessionInfo 값을 요청 동기요청
+		let loginState = null;
+		$.ajax({
+			url : "/puzzle/GetSessionInfo",
+			method:"post",
+			async: false, // 동기요청
+			success : function(json){
+				loginState = json;
+				console.log(loginState);
+			}
+		});
+		if(loginState == null){
+			location.href = "/puzzle/login.html";
+			return false; 
+		}
+		
+		//상단에 로그인 id표시
+		$("#loginState").text(loginState);		
+		
+		
+		//보스 처치후 exp와 level데이터를 가져온다. 
+		$.ajax({
+			url: "/puzzle/GetLevelServlet",
+			method : "POST",
+			data:{"memberId":loginState},
+			success:function(json){
+				
+				$(json).each(function(index, item){
+					level = item.level;
+					exp = item.exp;
+					$("#level").text(level);
+					$("#exp").text(exp);
+				});
+			}
+		});
+		
+		//로그아웃 버튼을 누르면  login.html으로 넘어감
+		$("#logout").click(function(){
+			$.ajax({
+				url : "/puzzle/Logout",
+				method:"post",
+				success : function(data){
+			    	console.log("로그아웃");
+				location.href = "/puzzle/login.html";
+				}
+			});       
+		});
+		
+		$("#home").click(function(){
+			$.ajax({
+				
+				
+				success : function(data){
+			   	location.href = "/puzzle/index.html";
+				}
+			});       
+		});
+		
+		
+	
+		
+//==========================================================================================================		
+		
+	    model = model1 
+		console.log(model.length)
+		
+		//model 그림 셔플
+		for(let i=0; i<100000; i++){
+			let ran = Math.floor(Math.random()*model.length);
+			let tmp = model[0];
+			model[0] = model[ran];
+			model[ran] = tmp;
+		}//페이지 로딩시 랜덤으로 섞어서 보여준다.
+
+				
+		//model 그림 출력(6*6)
+		$(".border").empty();
+		$(".border").append("<tr>");
+		$(model).each(function(index,item){
+			if(index%6==0){
+			$(".border").append("</tr>");
+			$(".border").append("<tr>");
+			$(".border").append("<td><input class ='pic' type='image' src='/puzzle/images/"+item+"'></td>");
+			}else{
+            $(".border").append("<td><input class ='pic' type='image' src='/puzzle/images/"+item+"'></td>");
+			}
+		});	
+		$(".border").append("</tr>");
+		
+		//그림을 사라지게 한다.
+		$(".pic").each(function(){
+			$(this).animate({opacity:0.1},2000);// 이슈 -> 이미지를 클릭하고 드래그를 하면 이미지가 보이는 버그가 있다 : 우클릭 방지로 버그를 잡을 수 있다.
+		
+		});
+	
+		//힌트 기능 추가
+		$("#hint").click(function(){
+		//그림이 잠시 보인다.	
+		$(".pic").each(function(){
+			$(this).animate({opacity:1},1000);
+		
+		});
+		//그림이 다시 사라진다.
+		$(".pic").each(function(){
+			$(this).animate({opacity:0.01},5000);
+		
+		});
+		});
+		
+		//게임 변수 설정 
+		let state = 0; // 0 or 1 or 2 
+		let success = 0; // 몇개의 그림을 맞추었는지 ....
+		let onePic =null;
+		let twoPic =null;
+		let combo=0;// 콤보변수
+		let demege = 10;//데미지 변수
+		let level = 1;
+		let exp = 0;
+
+		let total = 0;
+		let stage = 1;
+		let hp = 500; //보스 체력 변수
+		let timerNum = 180; //제한 시간 변수
+		let timer =0;
+		
+		//보스 사진 클릭시 게임시작과 타이머 시작
+		$("#boss").click(function(){
+		$(".board").empty();
+		timer =setInterval(function(){
+			timerNum--;
+			if(timerNum==0 && hp<=0){
+				
+			alert("시간종료"); 
+			clearInterval(timer);
+			}
+			$("#timer").text(timerNum);
+		},1000);
+		
+//=========================================================================================================		
+		$(document).on("click",".pic",function(){//동적으로 생성된 태그에 이벤트 핸들러 적용
+		
+			console.log("click");
+			console.log("stage:",stage);
+			console.log("total:", total);
+			console.log("success:", success);
+			
+		
+			total++;// 클릭할 때 마다 total 값 은 올라간다.
+			state++;
+			
+			//같은 그림을 맞추는 조건
+			$(this).attr("disabled",true); //더블클릭 방지를 위해
+			if(1==state){
+				$(this).animate({opacity:1},1);
+				onePic = $(this);
+				}else if(2 == state){
+				$(this).animate({opacity:1},1);
+				twoPic = $(this);
+				if($(onePic).attr("src")==$(twoPic).attr("src")){
+					$(this).animate({opacity:1},1);
+					success++;
+					combo++;
+					//그림을 맞추게 되면 보스 사진이 점점 줄어든다.
+					 $("#boss").animate({
+						left:'250px', height:'-=10px', width:'-=10px'
+						});
+					
+					//같은 그림을 연속으로 맞추게 되면 데미지 상승된다.
+				    if(combo>=2){
+				    	hp-= 10*combo;
+				    	$("#hp").text(hp);
+				    	$("#damage").text(demege*combo);
+				    }else if(combo<=1){
+				    	 hp -= 10;
+				    	 $("#hp").text(hp);
+				    	 $("#damage").text(demege*combo);
+				    }
+				    //보스 hp가 0이 되면 보스사진이 사라진다.	
+				    if(hp<=0){
+				    	 $("#boss").toggle(250);
+				    	 alert("보스처치 성공")
+					}
+				
+						console.log("success "+success);
+						console.log("combo "+combo);
+					
+					
+						//카드를 다 맞추면 다시 카드가 섞여서 나온다.
+						if(success == model.length/2){
+						stage =1;
+						success =0;
+						
+						if(stage == 1){
+							console.log("stage:" , stage);
+						
+							console.log(model.length)
+							//model의 그림 셔플
+							for(let i=0; i<100000; i++){
+								let ran = Math.floor(Math.random()*model.length);
+								let tmp = model[0];
+								model[0] = model[ran];
+								model[ran] = tmp;
+							}//페이지 로딩시 랜덤으로 섞어서 보여준다.
+
+									
+							//model의 그림 출력
+							$(".border").empty();
+							$(".border").append("<tr>");
+							$(model).each(function(index,item){
+								if(index%6==0){
+								$(".border").append("</tr>");
+								$(".border").append("<tr>");
+								$(".border").append("<td><input class ='pic' type='image' src='/puzzle/images/"+item+"'></td>");
+								}else{
+					            $(".border").append("<td><input class ='pic' type='image' src='/puzzle/images/"+item+"'></td>");
+								}
+							});	
+							$(".border").append("</tr>");
+								
+							$(".pic").each(function(){
+								$(this).animate({opacity:0.1},2000);// 이슈 -> 이미지를 클릭하고 드래그를 하면 이미지가 보이는 버그가 있다 : 우클릭 방지로 버그를 잡을 수 있다.
+								
+							});
+						} 
+					}
+
+//===============================================================================================
+				//게임이 종료되는 조건		
+				if(hp<0 || timerNum<1){
+					alert("게임종료 시간("+timerNum+"), 횟수("+total+")");	
+						
+					//보스 처치시 exp는 100을 나눈 나머지 값으로 들거가고 exp가 100이 넘어가면 level이 올라간다.
+					exp = exp + timerNum;
+					if(exp>=100){
+						level = Math.floor(level + (exp/100));
+						console.log(level);
+						exp = (exp%100);
+						console.log(exp);
+						}
+					
+						//획득한 exp와 level 데이터를 puzzle db에 넣는다.
+						$.ajax({ 
+							url:"/puzzle/AddReport",
+							method:"post",
+							data:{
+								"timerNum":timerNum, 
+								"count":total, 
+								"memberId":loginState,
+								"level":level
+								},
+							success:function(){
+								clearInterval(timer);
+								clearInterval(timerNum);
+								console.log("Addreport success");
+							
+									$.ajax({
+										url:"/puzzle/AddMember",
+										method:"post",
+										data:{
+											"level":level,
+											"exp":exp,
+											"memberId":loginState
+											},
+										success:function(json){
+											console.log("success");
+										}
+									});
+								}
+							});
+						}
+						
+				
+					}else{
+						 //그림이 틀릴때 
+						 combo=0;//콤보 초기화
+						 $(onePic).animate({opacity:0.01},500)
+						 $(twoPic).animate({opacity:0.01},500)
+						 $(onePic).attr("disabled",false);
+						 $(twoPic).attr("disabled",false);
+					}
+					state=0;
+		   		}
+			});
+		});
+	});
+
+</script>
+</html>
