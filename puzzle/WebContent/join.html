@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="/puzzle/scripts/jquery-3.4.1.min.js"></script>
+</head>
+<body>
+<h1>회원가입</h1>
+
+	<table>
+			<tr>
+				<td>Id</td>
+				<td><input id="Id" type="text"></td>
+			</tr>
+			<tr>
+				<td>aPw</td>
+				<td><input id="Pw" type="password"></td>
+			</tr>
+		</table>
+		<button id="joinBtn">가입</button>
+	<script>
+	
+	$(document).ready(function(){
+		$("#joinBtn").click(function(){
+			
+			$.ajax({
+				url : "/puzzle/Join",
+				method:"post",
+				data: {"Id":$("#Id").val(),
+					   "Pw":$("#Pw").val()
+					   },
+			    success : function(json){
+			    	console.log("success");
+				location.href = "/puzzle/login.html";
+				}
+			});
+				
+		});
+		
+	});
+</script>
+	
+	
+</body>
+</html>

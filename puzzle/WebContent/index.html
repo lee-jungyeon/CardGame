@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="/puzzle/scripts/jquery-3.4.1.min.js"></script>
+</head>
+<style>
+body {
+  background-image: url("gradient_bg.png");
+  background-repeat: repeat-x;
+  background-color: lightblue;
+
+}
+</style>
+<body>
+<!-- 
+
+	SELECT = FROM report
+	ORDER BY timer ASC, count ASC
+	
+	[TODAY TOP 10]
+	WHERE 날짜 함수(report_date) == 날짜 함수(now())
+	limit 10
+	
+	[TOP 10]limit 10
+	WHERE member_id=? -> 내꺼일 경우에만
+ -->
+<h1>id -<span id="myid"></span></h1>
+<div class="login">
+	<button id="topten">Top 10</button>
+	<table border="1" id="toptenlist">
+	
+	</table>
+	
+	<button id="today">오늘의 Top 10</button>
+	<table border="1" id="todaylist">
+	</table>
+	
+	<button id="month">이달의 Top 10</button>
+	<table border="1" id="monthlist">
+	</table>
+	
+	<!-- 로그인 전 -->
+	<button id="login">로그인</button>
+</div>
+<div class= "logout">
+	<!-- 로그인 후 -->
+	<button id="game">일반 게임하기</button>
+	<button id="bossgame">보스처치하기 </button>
+	<button id="logout">로그아웃</button>
+	<button id="reportlist">my report list</button>
+	<table border="1" id="myList">
+	
+	</table>
+	<button id="pwUpdate">비밀 번호 수정 </button>
+	
+		
+		
+	<button id="delete">회원탈퇴</button>
+</div>	
+</body>
+<script>
+	
+	$(document).ready(function(){
+		//로그인기능 추가
+		let loginState = null;
+		$.ajax({
+			url : "/puzzle/GetSessionInfo",
+			method:"post",
+			async: false, // 동기요청
+			success : function(json){
+				loginState = json;
+				console.log(loginState);
+			}
+		});
+		//로그인이 되있지않으면 logoutclass가 보이지않고 로그인이 되있으면 id가 login인 태그가 보이지 않는다.
+		if(loginState==null){
+			$(".logout").hide()
+		}else if(loginState!=null){
+			$("#login").hide()
+		}
+		
+		//상단에 로그인 id표시
+		$("#myid").text(loginState);		
+	
+//=====================================================================================================
+		
+		//top10 기능
+		$("#topten").click(function(){
+			$("#toptenlist").empty();
+			$.ajax({
+				url : "/puzzle/ReportServlet",
+				method: "POST",
+				success : function(json){// json파일-> 자바 스크립트 객체변경
+					$(json).each(function(index, item){
+					let html = "<tr>";
+						html += "<td>"+item.reportId+"</td>";
+						html += "<td>"+item.member.memberId+"</td>";
+						html += "<td>"+item.reportDate+"</td>";
+						html += "<td>"+item.count+"</td>";
+						html += "<td>"+item.timer+"</td>";
+						html += "</tr>";
+					$("#toptenlist").append(html);
+					console.log(json)
+					});
+				}
+			});
+		
+		});
+		
+		//오늘의 top10기능 
+		$("#today").click(function(){
+			$("#todaylist").empty();
+			$.ajax({
+				url : "/puzzle/ReportListTodayServlet",
+				method: "POST",
+				success : function(json){// json파일-> 자바 스크립트 객체변경
+					$(json).each(function(index, item){
+					let html = "<tr>";
+						html += "<td>"+item.reportId+"</td>";
+						html += "<td>"+item.member.memberId+"</td>";
+						html += "<td>"+item.reportDate+"</td>";
+						html += "<td>"+item.count+"</td>";
+						html += "<td>"+item.timer+"</td>";
+						html += "</tr>";
+					$("#todaylist").append(html);
+					console.log(json)
+					});
+				}
+			});
+		
+		});
+		
+		//이달의 top10기능
+		$("#month").click(function(){
+			$("#monthlist").empty();
+			$.ajax({
+				url : "/puzzle/ReportListMonthServlet",
+				method: "POST",
+				success : function(json){// json파일-> 자바 스크립트 객체변경
+					$(json).each(function(index, item){
+					let html = "<tr>";
+						html += "<td>"+item.reportId+"</td>";
+						html += "<td>"+item.member.memberId+"</td>";
+						html += "<td>"+item.reportDate+"</td>";
+						html += "<td>"+item.count+"</td>";
+						html += "<td>"+item.timer+"</td>";
+						html += "</tr>";
+					$("#monthlist").append(html);
+					console.log(json)
+					});
+				}
+			});
+		
+		});
+		
+		//나의 기록을 볼 수 있는 기능 
+		$("#reportlist").click(function(){
+	
+			$("#myList").empty();
+			$.ajax({
+				url : "/puzzle/RreporyMyListServlet",
+				method: "POST",
+				data: {"memberId":loginState},
+				success : function(json){// json파일-> 자바 스크립트 객체변경
+					$(json).each(function(index, item){
+					let html = "<tr>";
+						html += "<td>"+item.reportId+"</td>";
+						html += "<td>"+item.member.memberId+"</td>";
+						html += "<td>"+item.reportDate+"</td>";
+						html += "<td>"+item.count+"</td>";
+						html += "<td>"+item.timer+"</td>";
+						html += "</tr>";
+					$("#myList").append(html);
+					console.log(json)
+					});
+				}
+			});
+			    
+		});
+	
+		//회원탈퇴 기능
+		$("#delete").click(function(){
+			$.ajax({
+				data: {"memberId":loginState},
+			    success : function(json){
+			    console.log("dd");
+			    location.href = "/puzzle/delete.html";
+			    $("#myid").text("");
+			    }
+		});
+	});
+		
+		//비밀번호 수정 기능
+		$("#pwUpdate").click(function(){
+			$.ajax({
+				data: {"memberId":loginState},
+				success : function(json){
+				console.log("success");
+				location.href = "/puzzle/update.html";
+			}
+		});
+	});
+
+		//로그인창으로 간다.
+		$("#login").click(function(){
+			
+			$.ajax({
+				
+			    success : function(json){
+			    console.log("success");
+				location.href = "/puzzle/login.html";
+				}
+			});
+				
+		});
+		//로그아웃이 된다.
+		$("#logout").click(function(){
+			$.ajax({
+				url : "/puzzle/Logout",
+				method:"post",
+				success : function(data){
+			    	console.log("로그아웃");
+				location.href = "/puzzle/index.html";
+				}
+			});
+		});
+		// 일반 게임 하기
+		$("#game").click(function(){
+			
+			$.ajax({
+				
+			    success : function(json){
+			    console.log("success");
+				location.href = "/puzzle/nomalpuzzle.html";
+				}
+			});
+				
+		});
+		//보스 잡기 게임 하기
+		$("#bossgame").click(function(){
+		
+			$.ajax({
+			
+			    success : function(json){
+			    console.log("success");
+				location.href = "/puzzle/puzzle.html";
+			}
+		});
+			
+	});
+		
+	});
+</script>
+</html>
