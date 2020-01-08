@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="/jquery-ex/scripts/jquery-3.4.1.min.js"></script>
+</head>
+<body>
+		<table border="1">
+			<thead>
+			<tr>
+				<th>reporytId</th>
+				<th>id</th>
+				<th>reportDate</th>
+				<th>count</th>
+				<th>timer</th>
+			</tr>
+			</thead>	
+			<tbody id="list">
+			
+			
+			
+			</tbody>
+		</table>
+		
+		
+</body>
+
+<script>
+
+		$(document).ready(function(){
+		$("#list").empty();
+		$.ajax({
+			url : "/jquery-ex/ReportServlet",
+			method: "POST",
+			success : function(json){// json파일-> 자바 스크립트 객체변경
+				$(json).each(function(index, item){
+				let html = "<tr>";
+					html += "<td>"+item.reportId+"</td>";
+					html += "<td>"+item.member.memberId+"</td>";
+					html += "<td>"+item.reportDate+"</td>";
+					html += "<td>"+item.count+"</td>";
+					html += "<td>"+item.timer+"</td>";
+					html += "</tr>";
+				$("#list").append(html);
+				console.log(json)
+				});
+			}
+		});
+		});
+
+</script>
+</html>
