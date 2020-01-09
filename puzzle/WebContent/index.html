@@ -6,10 +6,65 @@
 <script src="/puzzle/scripts/jquery-3.4.1.min.js"></script>
 </head>
 <style>
-body {
-  background-image: url("gradient_bg.png");
-  background-repeat: repeat-x;
-  background-color: lightblue;
+<style>
+#customers {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#customers td, #customers th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#customers tr:nth-child(even){background-color: #f2f2f2;}
+
+#customers tr:hover {background-color: #ddd;}
+
+#customers th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #DA81F5;
+  color: white;
+}
+
+.button {
+	  margin:0 auto;
+	  background-color: #4CAF50; /* Green */
+	  border: none;
+	  color: white;
+	  padding: 16px 32px;
+	  text-align: center;
+	  text-decoration: none;
+	  display: inline-block;
+	  font-size: 16px;
+	  margin: 4px 2px;
+	  -webkit-transition-duration: 0.4s; /* Safari */
+	  transition-duration: 0.4s;
+	  cursor: pointer;
+}
+.button5 {
+	  background-color: white;
+	  color: black;
+	  border: 2px solid #555555;
+}
+
+.button5:hover {
+	  background-color: #555555;
+	  color: white;
+}
+.banner{
+	  background-image: url("gradient_bg.png");
+	  background-repeat: repeat-x;
+	  background-color: lightblue;
+	  height: 300px;	
+	  text-align: center;
+}
+.banner p{
+	  font-size:50px; 
+	 
 
 }
 </style>
@@ -26,39 +81,56 @@ body {
 	[TOP 10]limit 10
 	WHERE member_id=? -> 내꺼일 경우에만
  -->
-<h1>id -<span id="myid"></span></h1>
+ <br/>
+<div class="banner">
+<br/>
+<h1>User Id : <span id="myid"></span></h1>
+<p>CARD GAME
+<br/>
+
+<button id="login" class="button button5">로그인</button>
+<button id="logout" class="button button5 logout">로그아웃</button>
+</p>
+
+
+<br/>
+</div>
+
+
+
+<div class="allbtn" align="center">
 <div class="login">
-	<button id="topten">Top 10</button>
-	<table border="1" id="toptenlist">
-	
-	</table>
-	
-	<button id="today">오늘의 Top 10</button>
-	<table border="1" id="todaylist">
-	</table>
-	
-	<button id="month">이달의 Top 10</button>
-	<table border="1" id="monthlist">
-	</table>
-	
+	<button id="topten" class="button button5">Top 10</button>
+	<button id="today" class="button button5">오늘의 Top 10</button>
+	<button id="month" class="button button5">이달의 Top 10</button>
+
 	<!-- 로그인 전 -->
-	<button id="login">로그인</button>
+	
 </div>
 <div class= "logout">
 	<!-- 로그인 후 -->
-	<button id="game">일반 게임하기</button>
-	<button id="bossgame">보스처치하기 </button>
-	<button id="logout">로그아웃</button>
-	<button id="reportlist">my report list</button>
-	<table border="1" id="myList">
+	<button id="game" class="button button5">일반 게임하기</button>
+	<button id="bossgame" class="button button5">보스처치하기 </button>
+	<button id="reportlist" class="button button5">my report list</button>
+	<button id="pwUpdate" class="button button5">비밀 번호 수정 </button>
 	
-	</table>
-	<button id="pwUpdate">비밀 번호 수정 </button>
+	<button id="delete" class="button button5">회원탈퇴</button>
 	
-		
-		
-	<button id="delete">회원탈퇴</button>
 </div>	
+<table border="1" id="customers">
+		<thead id ="listHead">
+		<tr>
+			<th>Id</th>
+			<th>Date</th>
+			<th>Count</th>
+			<th>time</th>
+		</tr>
+		</thead>
+		<tbody id="allList">
+		
+		</tbody>
+	</table>
+</div>
 </body>
 <script>
 	
@@ -80,7 +152,7 @@ body {
 		}else if(loginState!=null){
 			$("#login").hide()
 		}
-		
+		$("#listHead").hide()
 		//상단에 로그인 id표시
 		$("#myid").text(loginState);		
 	
@@ -88,20 +160,20 @@ body {
 		
 		//top10 기능
 		$("#topten").click(function(){
-			$("#toptenlist").empty();
+			$("#listHead").show()
+			$("#allList").empty();
 			$.ajax({
 				url : "/puzzle/ReportServlet",
 				method: "POST",
 				success : function(json){// json파일-> 자바 스크립트 객체변경
 					$(json).each(function(index, item){
 					let html = "<tr>";
-						html += "<td>"+item.reportId+"</td>";
 						html += "<td>"+item.member.memberId+"</td>";
 						html += "<td>"+item.reportDate+"</td>";
 						html += "<td>"+item.count+"</td>";
 						html += "<td>"+item.timer+"</td>";
 						html += "</tr>";
-					$("#toptenlist").append(html);
+					$("#allList").append(html);
 					console.log(json)
 					});
 				}
@@ -111,20 +183,20 @@ body {
 		
 		//오늘의 top10기능 
 		$("#today").click(function(){
-			$("#todaylist").empty();
+			$("#listHead").show()
+			$("#allList").empty();
 			$.ajax({
 				url : "/puzzle/ReportListTodayServlet",
 				method: "POST",
 				success : function(json){// json파일-> 자바 스크립트 객체변경
 					$(json).each(function(index, item){
 					let html = "<tr>";
-						html += "<td>"+item.reportId+"</td>";
 						html += "<td>"+item.member.memberId+"</td>";
 						html += "<td>"+item.reportDate+"</td>";
 						html += "<td>"+item.count+"</td>";
 						html += "<td>"+item.timer+"</td>";
 						html += "</tr>";
-					$("#todaylist").append(html);
+					$("#allList").append(html);
 					console.log(json)
 					});
 				}
@@ -134,20 +206,20 @@ body {
 		
 		//이달의 top10기능
 		$("#month").click(function(){
-			$("#monthlist").empty();
+			$("#listHead").show()
+			$("#allList").empty();
 			$.ajax({
 				url : "/puzzle/ReportListMonthServlet",
 				method: "POST",
 				success : function(json){// json파일-> 자바 스크립트 객체변경
 					$(json).each(function(index, item){
 					let html = "<tr>";
-						html += "<td>"+item.reportId+"</td>";
 						html += "<td>"+item.member.memberId+"</td>";
 						html += "<td>"+item.reportDate+"</td>";
 						html += "<td>"+item.count+"</td>";
 						html += "<td>"+item.timer+"</td>";
 						html += "</tr>";
-					$("#monthlist").append(html);
+					$("#allList").append(html);
 					console.log(json)
 					});
 				}
@@ -157,8 +229,9 @@ body {
 		
 		//나의 기록을 볼 수 있는 기능 
 		$("#reportlist").click(function(){
+			$("#listHead").show()
 	
-			$("#myList").empty();
+			$("#allList").empty();
 			$.ajax({
 				url : "/puzzle/RreporyMyListServlet",
 				method: "POST",
@@ -166,13 +239,12 @@ body {
 				success : function(json){// json파일-> 자바 스크립트 객체변경
 					$(json).each(function(index, item){
 					let html = "<tr>";
-						html += "<td>"+item.reportId+"</td>";
 						html += "<td>"+item.member.memberId+"</td>";
 						html += "<td>"+item.reportDate+"</td>";
 						html += "<td>"+item.count+"</td>";
 						html += "<td>"+item.timer+"</td>";
 						html += "</tr>";
-					$("#myList").append(html);
+					$("#allList").append(html);
 					console.log(json)
 					});
 				}
@@ -194,6 +266,7 @@ body {
 		
 		//비밀번호 수정 기능
 		$("#pwUpdate").click(function(){
+			
 			$.ajax({
 				data: {"memberId":loginState},
 				success : function(json){

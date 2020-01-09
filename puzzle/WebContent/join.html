@@ -2,23 +2,53 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+<style>
+.banner{
+  background-image: url("gradient_bg.png");
+  background-repeat: repeat-x;
+  background-color: lightblue;
+  height: 300px;	
+  text-align: center;
+}
+.banner p{
+  font-size:50px; 
+  padding: 100px 0px;
+
+}
+</style>
 <title>Insert title here</title>
 <script src="/puzzle/scripts/jquery-3.4.1.min.js"></script>
 </head>
 <body>
-<h1>회원가입</h1>
+<div class="banner">
+	<a href="/puzzle/index.html"><p>CARD GAME</p></a>
 
-	<table>
-			<tr>
-				<td>Id</td>
-				<td><input id="Id" type="text"></td>
-			</tr>
-			<tr>
-				<td>aPw</td>
-				<td><input id="Pw" type="password"></td>
-			</tr>
-		</table>
-		<button id="joinBtn">가입</button>
+</div>
+<div class="container">
+<h1 >회원가입</h1>
+<br/>
+<br/>
+
+
+		   <div class="form-group">
+		      <label for="usr">Id:</label>
+		      <input id="Id" type="text" class="form-control" style="width: 300px">
+	   		</div>
+	   		
+			<div class="form-group">
+	      		<label for="pwd">Password:</label>
+	      		<input id="Pw" type="password"class="form-control" style="width: 300px">
+    		</div>
+				
+		
+		<button id="joinBtn" class="btn btn-primary">가입</button>
+	</div>
+	
 	<script>
 	
 	$(document).ready(function(){

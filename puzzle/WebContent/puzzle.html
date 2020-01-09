@@ -4,6 +4,43 @@
 <meta charset="UTF-8">
 <title>Insert title here</title>
 <style>
+.button {
+	  margin:0 auto;
+	  background-color: #4CAF50; /* Green */
+	  border: none;
+	  color: white;
+	  padding: 16px 32px;
+	  text-align: center;
+	  text-decoration: none;
+	  display: inline-block;
+	  font-size: 16px;
+	  margin: 4px 2px;
+	  -webkit-transition-duration: 0.4s; /* Safari */
+	  transition-duration: 0.4s;
+	  cursor: pointer;
+}
+.button5 {
+	  background-color: white;
+	  color: black;
+	  border: 2px solid #555555;
+}
+
+.button5:hover {
+	  background-color: #555555;
+	  color: white;
+}
+.banner{
+	  background-image: url("gradient_bg.png");
+	  background-repeat: repeat-x;
+	  background-color: lightblue;
+	  height: 350px;	
+	  text-align: center;
+}
+.banner p{
+	  font-size:45px; 
+	 
+
+}
 	table, td {border :1px solid gray;}
 	table,td {margin: auto;
 			text-align: center;}
@@ -15,13 +52,17 @@
 <script src="/puzzle/scripts/jquery-3.4.1.min.js"></script>
 </head>
 <body>
-	
-	<h1>puzzle -id : <span id= "loginState"></span></h1>
-	<h2 >Level :<span id="level"></span></h2>
-	<h2>Exp:<span id="exp"></span></h2>
-	<button id="logout" type="button"> 로그아웃</button>
-	<button id="hint" type="button">힌트</button>
-	<button id="home" type="button"> 홈으로</button>
+	<div class="banner">
+		<p>CARD GAME
+			<h2>User-id : <span id= "loginState"></span></h2>
+			<h2 >Level :<span id="level"></span></h2>
+			<h2>Exp:<span id="exp"></span></h2>
+			<button id="logout" type="button" class="button button5"> 로그아웃</button>
+			<button id="hint" type="button" class="button button5">힌트</button>
+			<button id="home" type="button" class="button button5"> 홈으로</button>
+		</p>
+</div>
+<br/>
 	<div>
 	<div><input id ="boss" type="image" src="/puzzle/images/boss.png"></div><br/>
 	<h2 > <span id="damage"></span>데미지</h2>
